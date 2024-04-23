@@ -2,7 +2,16 @@ let game = null;
 
 const main = () => {
 	const canvas = document.getElementById('game')
-	game = new PixelGameEngine(canvas, null)
+	game = new PixelGameEngine(canvas, null, {
+		map: {
+			tileWidth: 16,
+			tileHeight: 16
+		}
+	})
+
+	game.loadImages([
+		{ key: 'player-down-1', src: 'image/player/down-1.png' }
+	])
 
 	game.on('create-tile', tile => {
 		tile.color = '#00dddd'
@@ -13,6 +22,9 @@ const main = () => {
 	})
 
 	const player = game.createEntity('player', 0, 0, '#ff0000', true)
+	setTimeout(() => {
+		player.setImage('player-down-1');
+	})
 	const e1 = game.createEntity('e1', 2, 5, '#00ff00', true)
 	const e2 = game.createEntity('e2', 3, 1, '#00ff00', true)
 	const e3 = game.createEntity('e1', 4, 7, '#00ff00')

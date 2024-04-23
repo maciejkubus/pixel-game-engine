@@ -12,6 +12,7 @@ class PixelGameEntity {
 	allowMoveListener = () => true;
 	collid = false
 	aiMove = () => {}
+	image = null;
 
  	constructor(key, x = 0, y = 0, color = '#000000', collid = false) {
 		if(key)
@@ -77,6 +78,10 @@ class PixelGameEntity {
 		return this.attributes.find(a => a.name == name)
 	}
 
+	setImage(key) {
+		this.image = key;
+	}
+
 }
 
 class PixelGameEngine {
@@ -99,6 +104,7 @@ class PixelGameEngine {
 	tiles = [];
 	paused = false;
 	entities = [];
+	images = [];
 
 	/*
 	Listeners:
@@ -116,6 +122,7 @@ class PixelGameEngine {
 		new-entity (entity)
 		remove-entity (entity)
 		collision (entityA, entityB)
+		loaded-image (image)
 	*/
 	listeners = [] 
 
@@ -215,13 +222,25 @@ class PixelGameEngine {
 	}
 
 	drawEntity(entity) {
-		this.ctx.fillStyle = entity.color;
-		this.ctx.fillRect(
-			entity.x * this.map.tileWidth,
-			entity.y * this.map.tileHeight,
-			this.map.tileWidth,
-			this.map.tileHeight
-		)
+		if(entity.image) {
+			const image = this.getImage(entity.image);
+			this.ctx.drawImage(
+				image.image,
+				entity.x * this.map.tileWidth,
+				entity.y * this.map.tileHeight,
+				this.map.tileWidth,
+				this.map.tileHeight
+			)
+		}
+		else {
+			this.ctx.fillStyle = entity.color;
+			this.ctx.fillRect(
+				entity.x * this.map.tileWidth,
+				entity.y * this.map.tileHeight,
+				this.map.tileWidth,
+				this.map.tileHeight
+			)
+		}
 	}
 
 	clean() {
@@ -320,5 +339,39 @@ class PixelGameEngine {
 		}
 
 		return false;
+	}
+
+	loadImage(key, src, size) {
+		const defaultSize = { width: this.map.tileWidth, height: this.map.tileHeight }
+
+		const element = document.createElement('img');
+		element.src = src;
+		element.alt = key;
+		element.width = size && size.width ? size.width : defaultSize.width;
+		element.height = size && size.height ? size.height : defaultSize.height;
+
+		const image = {
+			key,
+			image: element
+		}
+
+		this.images.push(image)
+
+		this.listen('loaded-image', [image])
+		return image
+	}
+
+	loadImages(images) {
+		const loaded = []
+		images.forEach(image => {
+			loaded.push(
+				this.loadImage(image.key, image.src, image.size ? image.size : null )
+			)
+		})
+		return loaded;
+	}
+
+	getImage(key) {
+		return this.images.find(i => i.key == key)
 	}
 }
