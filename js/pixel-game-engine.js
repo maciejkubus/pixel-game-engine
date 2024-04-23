@@ -12,13 +12,14 @@ class PixelGameEntity {
 	allowMoveListener = () => true;
 	collid = false
 	aiMove = () => {}
+	onMove = () => {}
 	image = null;
 
  	constructor(key, x = 0, y = 0, color = '#000000', collid = false) {
 		if(key)
 			this.key = key;
 		else
-			this.key = 'entity' + Date.now();
+			this.key = 'entity-' + Date.now();
 
 		this.x = x;
 		this.y = y;
@@ -47,6 +48,10 @@ class PixelGameEntity {
 		this.restricted = restricted;
 	}
 
+	setOnMove(callback) {
+		this.onMove = callback
+	}
+
 	move(direction) {
 		let x = this.x;
 		let y = this.y;
@@ -65,7 +70,7 @@ class PixelGameEntity {
 
 		this.x = x;
 		this.y = y;
-
+		this.onMove({ direction, x, y })
 	}
 
 	setAttribute(name, value) {
